@@ -1,0 +1,17 @@
+- Jenever bar
+    - Jenevers inschenken
+    - het Jenever spel starten en leiden voor klanten
+- Toog 
+  - Pintjes inschenken
+  - Wijn inschenken
+  - alcoholvrije dranken inschenken
+  - soms eens wat afwas doen
+- Bonnetjes
+  - De mensen hun geld pakken en bonnetjes geven
+- Inkom
+  - inkom ged aanemen
+  - bandjes aandoen
+- Security
+  - Kijken of alles vlot verloopt
+  - als het druk is assistren bij inkom/bonnetjes
+  - irritant volk buiten zetten
