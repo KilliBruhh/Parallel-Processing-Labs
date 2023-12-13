@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "CL/cl.h"
 #include "../OpenCL_StartersLibrary/functions.c"
 

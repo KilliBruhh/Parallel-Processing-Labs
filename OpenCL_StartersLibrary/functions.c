@@ -13,7 +13,6 @@ void checkOpenClErrors(cl_int error, const char* message)
     }
 }
 
-
 cl_platform_id slectOpenClPlatforms() {
     cl_platform_id platform;
     cl_uint num_platforms;
@@ -25,12 +24,54 @@ cl_platform_id slectOpenClPlatforms() {
 }
 
 cl_device_id selectOpenClDevice(cl_platform_id platform) {
-    cl_device_id device;
+    cl_device_id device = NULL; // Initialize to NULL
+
     cl_uint num_devices;
+    cl_int err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, 0, NULL, &num_devices);
+    if (err != CL_SUCCESS || num_devices == 0) {
+        fprintf(stderr, "Error getting OpenCL devices.\n");
+        return NULL;
+    }
 
-    clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, 1, &device, &num_devices);
-    checkOpenClErrors(num_devices == 0, "No OpenCL devices available");
+    cl_device_id* devices = (cl_device_id*)malloc(num_devices * sizeof(cl_device_id));
+    if (!devices) {
+        fprintf(stderr, "Error allocating memory for devices.\n");
+        return NULL;
+    }
 
+    err = clGetDeviceIDs(platform, CL_DEVICE_TYPE_ALL, num_devices, devices, NULL);
+    if (err != CL_SUCCESS) {
+        fprintf(stderr, "Error getting OpenCL device IDs.\n");
+        free(devices);
+        return NULL;
+    }
+
+    printf("Available OpenCL devices:\n");
+
+    for (int i = 0; i < num_devices; i++) {
+        cl_char vendor[1024];
+        cl_char deviceName[1024];
+
+        clGetDeviceInfo(devices[i], CL_DEVICE_VENDOR, sizeof(vendor), vendor, NULL);
+        clGetDeviceInfo(devices[i], CL_DEVICE_NAME, sizeof(deviceName), deviceName, NULL);
+
+        printf("%d. Vendor: %s, Device: %s\n", i + 1, vendor, deviceName);
+    }
+
+    // Get the user's choice (you might want to add error checking for the input)
+    int selectedDevice;
+    printf("Enter the number of the OpenCL device you want to use: ");
+    scanf("%d", &selectedDevice);
+
+    // Check if the selected device number is valid
+    if (selectedDevice >= 1 && selectedDevice <= num_devices) {
+        device = devices[selectedDevice - 1];
+    }
+    else {
+        fprintf(stderr, "Invalid device number.\n");
+    }
+
+    free(devices);
     return device;
 }
 

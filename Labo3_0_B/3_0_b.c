@@ -32,7 +32,7 @@ int main(void)
     cl_kernel kernel;
     // Image variables
     int width, height;
-    float* inputImage = readImage("C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/Images/input.bmp", &width, &height);
+    float* inputImage = readImage("C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/!Images/input.bmp", &width, &height);
   
     // Initialize OpenCL
     platform = slectOpenClPlatforms();
@@ -62,7 +62,7 @@ int main(void)
     clEnqueueReadBuffer(command_queue, outputBuffer, CL_TRUE, 0, sizeof(float) * width * height, outputImage, 0, NULL, NULL);
 
     // Store the grayscale output image
-    storeImage(outputImage, "C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/Images/output.bmp", width, height, "C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/Images/input.bmp");
+    storeImage(outputImage, "C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/!Images/output.bmp", width, height, "C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/!Images/input.bmp");
 
     // Cleanup
     free(inputImage);

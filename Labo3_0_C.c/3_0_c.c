@@ -17,13 +17,14 @@ const char* kernelSource =
 "    int index = gidY * width + gidX;\n"
 "    int newIndex = (height - gidY - 1) * width + (width - gidX - 1);\n"
 "    uchar4 pixelValue = inputImage[index];\n"
-"    outputImage[newIndex] = pixelValue;\n"
+"    uchar4 adjustedPixelValue = (uchar4)(pixelValue.z, pixelValue.y, pixelValue.x, pixelValue.w);\n"  // Adjust for BGRA format
+"    outputImage[newIndex] = adjustedPixelValue;\n"
 "}\n";
 
 
 int main(void)
 {
-    printf("??? - Exercice 3_0_B \n");
+    printf("??? - Exercice 3_0_C \n");
     // Cl variables
     cl_platform_id platform;
     cl_device_id device;
@@ -31,15 +32,16 @@ int main(void)
     cl_command_queue command_queue;
     cl_program program;
     cl_kernel kernel;
-    // Image variables
-    int width, height;
-    float* inputImage = readImageRGBA("C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/Images/input.bmp", &width, &height);
 
     // Initialize OpenCL
     platform = slectOpenClPlatforms();
     device = selectOpenClDevice(platform);
     context = createContext(device);
     command_queue = createCommandQueue(context, device);
+    
+    // Image variables
+    int width, height;
+    float* inputImage = readImage("C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/!Images/input.bmp", &width, &height);
 
     // build the program
     program = buildProgram(context, device, kernelSource);
@@ -63,7 +65,7 @@ int main(void)
     clEnqueueReadBuffer(command_queue, outputBuffer, CL_TRUE, 0, sizeof(unsigned char) * width * height, outputImage, 0, NULL, NULL);
 
     // Store the grayscale output image
-    storeImageRGBA(outputImage, "C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/Images/output.bmp", width, height, "C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/Images/input.bmp");
+    storeImage(outputImage, "C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/!Images/output.bmp", width, height, "C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/!Images/input.bmp");
 
     // Cleanup
     free(inputImage);

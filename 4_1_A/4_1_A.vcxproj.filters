@@ -15,16 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="3_0_a.c">
+    <ClCompile Include="4_1_a.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\bmpFunctions\input.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="kernel.cl" />
+    <None Include="testing_results.md" />
   </ItemGroup>
 </Project>

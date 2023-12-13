@@ -21,10 +21,10 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{10fccda0-a446-4551-bf67-caefa8c7d569}</ProjectGuid>
-    <RootNamespace>Labo30</RootNamespace>
+    <ProjectGuid>{dfdb2d86-b94e-4826-afba-a04179c3a648}</ProjectGuid>
+    <RootNamespace>My41A</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>Labo3_0_A</ProjectName>
+    <ProjectName>Labo4_1_A</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -143,13 +143,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="3_0_a.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="..\bmpFunctions\input.bmp" />
+    <ClCompile Include="4_1_a.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="kernel.cl" />
+    <None Include="testing_results.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
