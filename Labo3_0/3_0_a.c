@@ -32,7 +32,7 @@ int main(void)
 
     // initialize Kernel
     // Initialize Kernel
-    char* kernelSource = readKernelSource("kernel.cl");
+    char* kernelSource = readKernelSource("C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/Labo3_0/kernel.cl");
     if (kernelSource == NULL) {
         printf("ERROR: Reading kernel source file\n");
         return -1;

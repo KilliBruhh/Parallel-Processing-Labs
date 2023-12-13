@@ -21,10 +21,9 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{dfdb2d86-b94e-4826-afba-a04179c3a648}</ProjectGuid>
-    <RootNamespace>My41A</RootNamespace>
+    <ProjectGuid>{e4c330b5-87fd-4265-b36b-da8f267b30e3}</ProjectGuid>
+    <RootNamespace>Labo41A2</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>Labo4_1_A.1</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -143,11 +142,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="4_1_a1.c" />
+    <ClCompile Include="..\4_1_A\4_1_a2.c" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="kernel.cl" />
-    <None Include="testing_results.md" />
+    <None Include="..\4_1_A\testing_results.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

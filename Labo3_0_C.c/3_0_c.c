@@ -11,15 +11,16 @@
 #define MAX_SOURCE_SIZE (0x10000)  // 64 KB
 
 const char* kernelSource =
-"__kernel void rotate180(__global uchar4* inputImage, __global uchar4* outputImage, const int width, const int height) {\n"
+"__kernel void rotate180(__global uchar* inputImage, __global uchar* outputImage, const int width, const int height) {\n"
 "    int gidX = get_global_id(0);\n"
 "    int gidY = get_global_id(1);\n"
 "    int index = gidY * width + gidX;\n"
 "    int newIndex = (height - gidY - 1) * width + (width - gidX - 1);\n"
-"    uchar4 pixelValue = inputImage[index];\n"
-"    uchar4 adjustedPixelValue = (uchar4)(pixelValue.z, pixelValue.y, pixelValue.x, pixelValue.w);\n"  // Adjust for BGRA format
-"    outputImage[newIndex] = adjustedPixelValue;\n"
+"    uchar pixelValue = inputImage[index];\n"
+"    outputImage[newIndex] = pixelValue;\n"
 "}\n";
+
+
 
 
 int main(void)
@@ -41,31 +42,39 @@ int main(void)
     
     // Image variables
     int width, height;
-    float* inputImage = readImage("C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/!Images/input.bmp", &width, &height);
+    unsigned char* inputImage = readImage("C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/!Images/input.bmp", &width, &height);
+
+    // Allocate memory for the output image
+    unsigned char* outputImage = (unsigned char*)malloc(sizeof(unsigned char) * width * height);
+
+    // Create OpenCL buffers for input and output images
+    cl_mem inputBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned char) * width * height, inputImage, NULL);
+    cl_mem outputBuffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(unsigned char) * width * height, NULL, NULL);
 
     // build the program
     program = buildProgram(context, device, kernelSource);
 
     // Create the kernel
     kernel = createKernel(program, "rotate180");
-    // Allocate memory for the output image
-    unsigned char* outputImage = (unsigned char*)malloc(sizeof(unsigned char) * width * height * 4);  // Assuming RGBA format
-
-    // Create OpenCL buffers for input and output images
-    cl_mem inputBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(unsigned char) * width * height * 4, inputImage, NULL);
-    cl_mem outputBuffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, sizeof(unsigned char) * width * height * 4, NULL, NULL);
-
+   
     // Define global and local work sizes
     size_t global_work_size[] = { width, height };  // Adjust based on your image size
 
     // Enqueue and run the kernel
+    clSetKernelArg(kernel, 0, sizeof(cl_mem), &inputBuffer);
+    clSetKernelArg(kernel, 1, sizeof(cl_mem), &outputBuffer);
+    clSetKernelArg(kernel, 2, sizeof(int), &width);
+    clSetKernelArg(kernel, 3, sizeof(int), &height);
+
     clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, global_work_size, NULL, 0, NULL, NULL);
+    clFinish(command_queue);
 
     // Read the result back to the host
     clEnqueueReadBuffer(command_queue, outputBuffer, CL_TRUE, 0, sizeof(unsigned char) * width * height, outputImage, 0, NULL, NULL);
 
     // Store the grayscale output image
-    storeImage(outputImage, "C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/!Images/output.bmp", width, height, "C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/!Images/input.bmp");
+    storeImage((unsigned char*)outputImage, "C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/!Images/output.bmp", width, height, "C:/Users/Killi/OneDrive/Documenten/School/Fase 4/Parralel Processing/Lab/!Images/input.bmp");
+
 
     // Cleanup
     free(inputImage);
@@ -75,7 +84,6 @@ int main(void)
     clReleaseMemObject(outputBuffer);
 
     printf("Image rotation (180 degrees) completed!\n");
-
 
     return 0;
 }

@@ -1,4 +1,4 @@
-// Lab 4 Oef 1 part A - optimizing Matrix Multiplication
+// Lab 4 Oef 1 part A.1 - optimizing Matrix Multiplication
 // use of Local memory
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -21,7 +21,7 @@ void printMatrix(float* matrix, int N) {
 
 int main(void)
 {
-    printf("Exercice 4_1_A \n");
+    printf("Exercice 4_1_A.1 \n");
 
     // Time variables
     clock_t start, end;

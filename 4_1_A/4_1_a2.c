@@ -1,9 +1,9 @@
-// Lab 3 Oef 2 - Matrix Multiplication
+// Lab 3 Oef 2 Part A.2 - optimizing Matrix Multiplication
 
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include <time.h>spot
 #include "CL/cl.h"
 #include "../OpenCL_StartersLibrary/functions.c"
 
@@ -20,16 +20,36 @@ void printMatrix(float* matrix, int rows, int cols) {
     }
 }
 
+// kernel Code for Matrix Multiplication
+const char* source_code =
+"__kernel void matrixMultiplication(__global float* A, __global float* B, __global float* C, int M, int N, int P) {\n"
+"    int row = get_global_id(0);\n"
+"    int col = get_global_id(1);\n"
+"    int localSize = get_local_size(0);\n"
+"    int localID = get_local_id(0);\n"
+"    float sum = 0.0f;\n"
+"    for (int i = 0; i < N; i += localSize) {\n"
+"        __local float localB[LOCAL_SIZE][LOCAL_SIZE];\n"
+"        localB[localID][localID] = B[(i + localID) * P + col];\n"
+"        barrier(CLK_LOCAL_MEM_FENCE);\n"
+"        for (int j = 0; j < localSize; ++j) {\n"
+"            sum += A[row * N + i + j] * localB[j][localID];\n"
+"        }\n"
+"        barrier(CLK_LOCAL_MEM_FENCE);\n"
+"    }\n"
+"    C[row * P + col] = sum;\n"
+"}\n";
+
 
 int main(void)
 {
-    printf("Exercice 2_2_B \n");
+    printf("Exercice 4_1_A.2 \n");
 
     // time variables
     clock_t start, end;
     double cpu_time_used;
 
-    // opencl variables
+    // OpenCl Variables
     cl_platform_id platform;
     cl_device_id device;
     cl_context context;
@@ -43,18 +63,6 @@ int main(void)
     context = createContext(device);
     command_queue = createCommandQueue(context, device);
 
-    // kernel Code for Matrix Multiplication
-    const char* source_code =
-        "__kernel void matrixMultiplication(__global float* A, __global float* B, __global float* C, int M, int N, int P) {\n"
-        "    int row = get_global_id(0);\n"
-        "    int col = get_global_id(1);\n"
-        "    float sum = 0.0f;\n"
-        "    for (int i = 0; i < N; i++) {\n"
-        "        sum += A[row * N + i] * B[i * P + col];\n"
-        "    }\n"
-        "    C[row * P + col] = sum;\n"
-        "}\n";
-
     // Set up Matrix Dimention
     int M = MATRIX_SIZE_M;
     int N = MATRIX_SIZE_N;
@@ -66,7 +74,7 @@ int main(void)
 
     // Run the OpenCl Program and create Kernal
     program = createProgram(context, device, source_code);
-    kernel = createKernel(program, "matrixMultiplication"); 
+    kernel = createKernel(program, "matrixMultiplication");
 
     // Create the matrixes (A, B, C)
     float* A = (float*)malloc(matrixSizeA * sizeof(float));
@@ -117,7 +125,7 @@ int main(void)
     printf("\nResult Matrix C:\n");
     printMatrix(C, M, P);
     cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
-    printf("??? - Execution Time: %f seconds\n", cpu_time_used);
+    printf("Execution Time: %.15f seconds\n", cpu_time_used);
 
     // Cleanup
     free(A);

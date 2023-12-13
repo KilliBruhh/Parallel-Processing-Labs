@@ -15,12 +15,11 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="4_1_a1.c">
+    <ClCompile Include="..\4_1_A\4_1_a2.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="kernel.cl" />
-    <None Include="testing_results.md" />
+    <None Include="..\4_1_A\testing_results.md" />
   </ItemGroup>
 </Project>
