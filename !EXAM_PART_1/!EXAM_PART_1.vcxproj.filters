@@ -15,11 +15,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="2_2_a.c">
+    <ClCompile Include="ex_1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="notes.md" />
     <None Include="kernel.cl" />
   </ItemGroup>
 </Project>

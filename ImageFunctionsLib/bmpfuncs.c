@@ -78,7 +78,8 @@ void storeImage(float* imageOut, const char* filename, int rows, int cols,
 
 /*
  * Read bmp image and convert to byte array. Also output the width and height
- */
+*/
+
 float* readImage(const char* filename, int* widthOut, int* heightOut) {
 
     uchar* imageData;

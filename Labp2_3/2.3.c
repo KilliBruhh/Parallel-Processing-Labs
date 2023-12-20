@@ -1,13 +1,15 @@
-// Lab 3 Oef 2 - Matrix Multiplication
 
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include "CL/cl.h"
 #include "../OpenCL_StartersLibrary/functions.c"
+#include "../OpenCL_StartersLibrary/starter.h"
+#include "../ImageFunctionsLib/bmpfuncs.h"
+#include "../ImageFunctionsLib/bmpfuncs.c"
 #include <stdint.h>
 
-#define MATRIXSIZE 4;
+#define MATRIX_SIZE 4
 
 void printMatrix(float* matrix, int N) {
     for (int i = 0; i < N; ++i) {
@@ -17,10 +19,9 @@ void printMatrix(float* matrix, int N) {
         printf("\n");
     }
 }
-
 int main(void)
 {
-    printf("Exercice 2_2_A \n");
+    printf("Exercice 2_3 - Matrix Avarages \n");
     cl_platform_id platform;
     cl_device_id device;
     cl_context context;
@@ -34,38 +35,36 @@ int main(void)
     context = createContext(device);
     command_queue = createCommandQueue(context, device);
 
-
     // Read OpenCL Source
     char* sourceCode;
     uint32_t fileLength = 0;
     FILE* fp = fopen("kernel.cl", "rb");
-
     fseek(fp, 0, SEEK_END);
+
     fileLength = ftell(fp);
-
     sourceCode = (char*)malloc(sizeof(char) * fileLength + 1);
-    rewind(fp);
 
+    rewind(fp);
     fread(sourceCode, sizeof(char), fileLength, fp);
     sourceCode[fileLength] = '\0';
 
     printf("Kernel Source:\n%s\n", sourceCode);
 
-    // Run the OpenCl Program and create Kernal
+    // build program and create kernel
     program = createProgram(context, device, sourceCode);
-    kernel = createKernel(program, "matrixMultiplication");
+    kernel = createKernel(program, "matrix_avarages");
 
-    // Set up the matrix dientions
-    int N = MATRIXSIZE;
-    size_t matrixSize = N * N;
+    // set up matrix
+    int N = MATRIX_SIZE;
+    size_t matrixSize = N * N; // 4 by 4
 
     // Create the matrixes (A, B, C)
     float* A = (float*)malloc(matrixSize * sizeof(float));
     float* B = (float*)malloc(matrixSize * sizeof(float));
     float* C = (float*)malloc(matrixSize * sizeof(float));
 
-    // Fill the matrixes
-    for (int i = 0; i < matrixSize; ++i) {
+    // fill matrix
+    for (int i = 0; i < matrixSize; i++) {
         A[i] = rand() % 10;
         B[i] = rand() % 10;
     }
@@ -77,7 +76,7 @@ int main(void)
 
     clEnqueueWriteBuffer(command_queue, bufferA, CL_TRUE, 0, matrixSize * sizeof(float), A, 0, NULL, NULL);
     clEnqueueWriteBuffer(command_queue, bufferB, CL_TRUE, 0, matrixSize * sizeof(float), B, 0, NULL, NULL);
-    
+
     // Print matrices A and B
     printf("Matrix A:\n");
     printMatrix(A, N);
@@ -90,7 +89,7 @@ int main(void)
     clSetKernelArg(kernel, 1, sizeof(cl_mem), &bufferB);
     clSetKernelArg(kernel, 2, sizeof(cl_mem), &bufferC);
     clSetKernelArg(kernel, 3, sizeof(int), &N);
-    
+
     // Execute the kernel
     size_t globalWorkSize[2] = { N, N };
     clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
@@ -107,16 +106,11 @@ int main(void)
     free(A);
     free(B);
     free(C);
-
-    clReleaseMemObject(bufferA);
-    clReleaseMemObject(bufferB);
-    clReleaseMemObject(bufferC);
-
     clReleaseKernel(kernel);
     clReleaseProgram(program);
     clReleaseCommandQueue(command_queue);
     clReleaseContext(context);
 
 
-	return 0;
+    return 0;
 }
