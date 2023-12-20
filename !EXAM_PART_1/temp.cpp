@@ -31,7 +31,7 @@
 using namespace std;
 using namespace std::chrono;
 
-#define N 200		// Default 200
+#define N 4		// Default 200
 #define NBR_EXPERIMENTS 3
 #define NBR_ALGORITHM_VERSIONS 100 // take big enough
 
@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 		}
 	}
 	if (PRINT_DATA) cout << endl;
-
+		
 
 	long long runtimes[NBR_ALGORITHM_VERSIONS][NBR_EXPERIMENTS];
 	vector<string> names;
@@ -143,7 +143,7 @@ int main(int argc, char* argv[])
 		if (t == 0) names.push_back("MxM with optimizations");
 
 		// ********* THE SECOND VERSION *********
-		runtimes[version++][t] = mxm_multithreaded(arr, arr2, arr4); // returns time in microseconds
+		runtimes[version++][t] = mxm_multithreaded(arr, arr2, arr4, source_code); // returns time in microseconds
 		if (t == 0) {
 			names.push_back("MxM Multithreaded");
 			//checkIfResultsAreTheSame(names.back(), arr3, arr4, N);
@@ -300,7 +300,7 @@ char* getSourceCode() {
 	// Read OpenCL Source
 	char* sourceCode;
 	uint32_t fileLength = 0;
-	FILE* fp = fopen("kernel_test.cl", "rb");
+	FILE* fp = fopen("kernel.cl", "rb");
 
 	fseek(fp, 0, SEEK_END);
 	fileLength = ftell(fp);
@@ -311,7 +311,7 @@ char* getSourceCode() {
 	fread(sourceCode, sizeof(char), fileLength, fp);
 	sourceCode[fileLength] = '\0';
 
-	// cout << " \n Kernel Source: \n" << sourceCode << "\n" << endl;
+	cout << " \n Kernel Source: \n" << sourceCode << "\n" << endl;
 
 	return sourceCode;
 }
@@ -356,7 +356,10 @@ void setupBuffers() {
 	clEnqueueWriteBuffer(command_queue, bufferA, CL_TRUE, 0, matrixSize * sizeof(float), A, 0, NULL, NULL);
 	clEnqueueWriteBuffer(command_queue, bufferB, CL_TRUE, 0, matrixSize * sizeof(float), B, 0, NULL, NULL);
 
-	
+	cout << "Matrix A: " << endl;
+	printMatrix(A);
+	cout << "Matrix B: " << endl;
+	printMatrix(B);
 
 	// Kernel arguments
 	clSetKernelArg(kernel, 0, sizeof(cl_mem), &bufferA);
@@ -371,13 +374,14 @@ void executeKernel() {
 	clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
 	// Retrieve Matrix C form the Device
 	clEnqueueReadBuffer(command_queue, bufferC, CL_TRUE, 0, matrixSize * sizeof(float), C, 0, NULL, NULL);
-	
+	cout << "Result of Matrix C: " << endl;
+	printMatrix(C);
 }
 
 void printMatrix(float* matrix) {
 	for (int i = 0; i < N; ++i) {
 		for (int j = 0; j < N; ++j) {
-			cout << matrix[i * N + j] << "  |  ";
+			cout <<  matrix[i * N + j] << "  |  ";
 		}
 		cout << "\n";
 	}
