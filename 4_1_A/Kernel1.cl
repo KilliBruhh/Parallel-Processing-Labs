@@ -1,3 +1,5 @@
+#define LOCAL_SIZE 16
+
 __kernel void matrixMultiplication(__global float* A, __global float* B, __global float* C, int M, int N, int P) {
     int row = get_global_id(0);
     int col = get_global_id(1);
@@ -5,8 +7,10 @@ __kernel void matrixMultiplication(__global float* A, __global float* B, __globa
     int localID = get_local_id(0);
     float sum = 0.0f;
 
+    __local float localB[LOCAL_SIZE][LOCAL_SIZE];
+
+
     for (int i = 0; i < N; i += localSize) {        
-        __local float localB[LOCAL_SIZE][LOCAL_SIZE];
         localB[localID][localID] = B[(i + localID) * P + col];
         barrier(CLK_LOCAL_MEM_FENCE);
         

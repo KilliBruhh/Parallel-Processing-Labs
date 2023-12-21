@@ -17,11 +17,13 @@ MxM Multithreaded                |     20818 |     21178 | 2.40344% |  0.768566 
 MxM Killian                      |      1866 |      1933 | 3.31092% |   8.57449 |  0.257235 |   1.16625 |    11.037 |
 ```
 
-##Results after optimizing kernel code
+## Results after optimizing kernel code
+- MxM Killian runs between 10 - 68 (lowest and highest i got at this point)
+
 ```bash
 ***** Version Name *****     | min(us)   | mean(us)  | stddev    | GOp/s     |  GB/s     |   CPI     | speedup   |
-MxM with optimizations           |     21020 |     21495 | 1.61433% |   0.76118 | 0.0228354 |   13.1375 |         1 |
-MxM Multithreaded                |     20575 |     21286 | 3.02076% |  0.777643 | 0.0233293 |   12.8594 |   1.02163 |
-MxM Killian                      |        65 |    200128 | 81.6103% |   246.154 |   7.38462 |  0.040625 |   323.385 |
+MxM with optimizations           |     20561 |     20843 | 1.59286% |  0.778172 | 0.0233452 |   12.8506 |         1 |
+MxM Multithreaded                |     20798 |     20923 | 0.425369% |  0.769305 | 0.0230791 |   12.9987 |  0.988605 |
+MxM Killian                      |        10 |        34 | 70.5882% |      1600 |        48 |   0.00625 |    2056.1 |
 ```
 

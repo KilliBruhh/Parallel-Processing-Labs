@@ -46,9 +46,11 @@ cl_kernel kernel;
 cl_mem bufferA;
 cl_mem bufferB;
 cl_mem bufferC;
-float* A;
-float* B;
-float* C;
+float* A[N][N];
+float* B[N][N];
+float* C[N][N]; // For Killian version
+float* D[N][N]; // For Version 1
+float* E[N][N]; // For Version 2
 size_t matrixSize;
 int N2 = N;
 size_t globalWorkSize[2] = { N, N };
@@ -57,10 +59,10 @@ char* getSourceCode();
 void initializeOpenCl();
 void cleanOpenCl();
 void setupMatrix();
-void setupBuffers();
+void setupBuffers(float arr[N][N], float arr2[N][N]);
 void printMatrix(float* matrix);
-void executeKernel();
-long long runClProgram();
+void executeKernel(float arr[N][N]);
+long long runClProgram(float arr[N][N]);
 
 // the different sequential versions
 long long mxm_sequential(float first[N][N], float second[N][N], float multiply[N][N]);
@@ -117,6 +119,7 @@ int main(int argc, char* argv[])
 	float arr2[N][N];
 	float arr3[N][N];
 	float arr4[N][N];
+	float arr5[N][N];
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < N; j++) {
 			arr[i][j] = rand();
@@ -124,6 +127,7 @@ int main(int argc, char* argv[])
 			//	if (PRINT_DATA && i < 10) cout << arr[i] << "*" << arr2[i] << ", ";
 			arr3[i][j] = 0; // actually, initialization is not necessary
 			arr4[i][j] = 0;
+			arr5[i][j] = 0;
 		}
 	}
 	if (PRINT_DATA) cout << endl;
@@ -133,8 +137,8 @@ int main(int argc, char* argv[])
 	vector<string> names;
 
 	initializeOpenCl();
-	setupMatrix();
-	setupBuffers();
+	// setupMatrix();
+	setupBuffers(arr, arr2);
 
 	for (int t = 0; t < NBR_EXPERIMENTS; t++) { // run multiple times because of fluctuations
 		int version = 0;
@@ -142,18 +146,18 @@ int main(int argc, char* argv[])
 		runtimes[version++][t] = mxm_sequential(arr, arr2, arr3); // returns time in microseconds
 		if (t == 0) names.push_back("MxM with optimizations");
 
-		// ********* THE SECOND VERSION *********
+		// ********* THE SECOND VERSION *********	
 		runtimes[version++][t] = mxm_multithreaded(arr, arr2, arr4); // returns time in microseconds
 		if (t == 0) {
 			names.push_back("MxM Multithreaded");
-			//checkIfResultsAreTheSame(names.back(), arr3, arr4, N);
+			checkIfResultsAreTheSame(names.back(), arr3, arr4, N);
 		}
 
 		// ********* Killian VERSION ********* 
-		runtimes[version++][t] = runClProgram(); // returns time in microseconds
+		runtimes[version++][t] = runClProgram(arr5); // returns time in microseconds
 		if (t == 0) {
 			names.push_back("MxM Killian");
-			//checkIfResultsAreTheSame(names.back(), arr3, arr4, N);
+			checkIfResultsAreTheSame(names.back(), arr3, arr5, N);
 		}
 
 		// ********* YET ANOTHER VERSION *********
@@ -206,7 +210,10 @@ long long mxm_multithreaded(float first[N][N], float second[N][N], float multipl
 		for (int d = 0; d < N; d++) {
 			float sum = 0;
 			for (int k = 0; k < N; k++) {
-				sum = sum + first[c][k] * second[d][k];
+				// original:
+				// sum = sum + first[c][k] * second[d][k];
+				// Fixed that V1 and V2 have same algorithm results	
+				sum = sum + first[c][k] * second[k][d];
 			}
 
 			multiply[c][d] = sum;
@@ -269,6 +276,8 @@ void checkIfResultsAreTheSame(string name, float arr3[N][N], float arr4[N][N], i
 	if (PRINT_DATA) cout << endl;
 	if (nbr_diff > 0)
 		cout << "Problem with algorithm " << name << ": " << nbr_diff << " differences with Original Algorithm." << endl;
+	else
+		cout << "Algorithm "<< name	<<" is OK " <<endl;
 }
 
 long long minimalValue(long long* values, int NBR) {
@@ -300,7 +309,7 @@ char* getSourceCode() {
 	// Read OpenCL Source
 	char* sourceCode;
 	uint32_t fileLength = 0;
-	FILE* fp = fopen("kernel_test.cl", "rb");
+	FILE* fp = fopen("kernel.cl", "rb");
 
 	fseek(fp, 0, SEEK_END);
 	fileLength = ftell(fp);
@@ -336,25 +345,29 @@ void setupMatrix() {
 	// Set up Matrix Dimentions --> DEFAULT 200 FOR TESTING I CHOOSE 4
 	matrixSize = N * N; // 4x4
 	// Create matrixes
-	A = (float*)malloc(matrixSize * sizeof(float));
-	B = (float*)malloc(matrixSize * sizeof(float));
-	C = (float*)malloc(matrixSize * sizeof(float));
+	A[N][N] = (float*)malloc(matrixSize * sizeof(float));
+	B[N][N] = (float*)malloc(matrixSize * sizeof(float));
+	C[N][N] = (float*)malloc(matrixSize * sizeof(float));
 	// Fill the matrixes
-	for (int i = 0; i < matrixSize; ++i)
-	{
-		A[i] = rand() % 10;
-		B[i] = rand() % 10;
+
+
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			A[i][j] = (float*)rand();
+			B[i][j] = (float*)rand();
+		}
 	}
+
 }
 
-void setupBuffers() {
+void setupBuffers(float arrA[N][N], float arrB[N][N]) {
 	// Allocate mem for Buffers
 	bufferA = clCreateBuffer(context, CL_MEM_READ_ONLY, matrixSize * sizeof(float), NULL, NULL);
 	bufferB = clCreateBuffer(context, CL_MEM_READ_ONLY, matrixSize * sizeof(float), NULL, NULL);
 	bufferC = clCreateBuffer(context, CL_MEM_WRITE_ONLY, matrixSize * sizeof(float), NULL, NULL);
 
-	clEnqueueWriteBuffer(command_queue, bufferA, CL_TRUE, 0, matrixSize * sizeof(float), A, 0, NULL, NULL);
-	clEnqueueWriteBuffer(command_queue, bufferB, CL_TRUE, 0, matrixSize * sizeof(float), B, 0, NULL, NULL);
+	clEnqueueWriteBuffer(command_queue, bufferA, CL_TRUE, 0, matrixSize * sizeof(float), arrA, 0, NULL, NULL);
+	clEnqueueWriteBuffer(command_queue, bufferB, CL_TRUE, 0, matrixSize * sizeof(float), arrB, 0, NULL, NULL);
 
 	
 
@@ -365,13 +378,13 @@ void setupBuffers() {
 	clSetKernelArg(kernel, 3, sizeof(int), &N2);
 }
 
-void executeKernel() {
+void executeKernel(float arrC[N][N]) {
 
 	// Execute the kernel
 	clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, globalWorkSize, NULL, 0, NULL, NULL);
 	// Retrieve Matrix C form the Device
-	clEnqueueReadBuffer(command_queue, bufferC, CL_TRUE, 0, matrixSize * sizeof(float), C, 0, NULL, NULL);
-	
+	clEnqueueReadBuffer(command_queue, bufferC, CL_TRUE, 0, matrixSize * sizeof(float), arrC, 0, NULL, NULL);
+
 }
 
 void printMatrix(float* matrix) {
@@ -386,11 +399,11 @@ void printMatrix(float* matrix) {
 
 
 void cleanOpenCl() {
-
+	/* Not used anymore
 	free(A);
 	free(B);
 	free(C);
-
+	*/
 	clReleaseMemObject(bufferA);
 	clReleaseMemObject(bufferB);
 	clReleaseMemObject(bufferC);
@@ -401,11 +414,11 @@ void cleanOpenCl() {
 	clReleaseContext(context);
 }
 
-long long runClProgram() {
+long long runClProgram(float arr5[N][N]) {
 
 	time_point<system_clock> now = system_clock::now();
 
-	executeKernel();
+	executeKernel(arr5);
 
 	time_point<system_clock> epoch = system_clock::now();
 	microseconds us = duration_cast<microseconds>(epoch - now);
